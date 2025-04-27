@@ -1,0 +1,65 @@
+Launch an ec2 instance with t2.micro, min 20 gib volume and attach IAM role to our instance.
+Connect the server.
+
+Go to vim .bashrc and paste the path (export PATH=$PATH:/usr/local/bin/). This is default path.
+Next give source .bashrc
+Install aws cli 
+
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+
+Install kubectl & kops, give x permissions  and mv to the default path.
+
+   curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+   chmod +x kubectl
+   mv kubectl /usr/local/bin/
+
+Install kops
+
+    curl -Lo kops https://github.com/kubernetes/kops/releases/download/$(curl -s https://api.github.com/repos/kubernetes/kops/releases/latest | grep tag_name | cut -d '"' -f 4)/kops-linux-amd64
+    chmod +x kops
+    sudo mv kops /usr/local/bin/kops
+
+Create bucket  
+        aws s3 mb s3://chaitanya.devops
+
+Enable bucket versiong. 
+
+Store our cluster information in bucket.
+        export KOPS_STATE_STORE=s3://chaitanya.devops
+
+Now create cluster
+       kops create cluster --name chaitu.k8s.local --zones us-east-1a,us-east-1b --master-size t2.medium --master-count 1 --master-volume-size 30 --node-size t2.micro --node-count 2 --node-volume-size 20
+
+Now one command will generate copy paste it.
+         kops update cluster --name chaitu.k8s.local --yes --admin
+
+Check whether master and worker nodes created or not
+         kubectl get no
+For live update  
+         kubectl get no -w
+
+And check Auto Scaling Groups, Target Groups, Load Balancers, Resource map in VPCs.
+
+
+TO DELETE THE CLUSTER
+       export KOPS_STATE_STORE=s3://chaitanya.devops
+       kops get cluster
+       kops delete cluster chaitu.k8s.local - -yes   
+
+DELETING CLUSTER MANUALLY
+Delete manually 
+      - Auto Scaling Groups
+      - Load Balancers
+      - Target Groups
+      - VPCs 
+
+
+
+
+
+
+
+
+
